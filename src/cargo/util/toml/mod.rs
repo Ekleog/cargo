@@ -13,6 +13,7 @@ use serde::ser;
 use serde::{Deserialize, Serialize};
 use url::Url;
 
+use crate::core::compiler::{CompileKind, CompileTarget};
 use crate::core::dependency::DepKind;
 use crate::core::manifest::{ManifestMetadata, TargetSourcePath, Warnings};
 use crate::core::profiles::Strip;
@@ -807,6 +808,7 @@ pub struct TomlProject {
     authors: Option<Vec<String>>,
     build: Option<StringOrBool>,
     metabuild: Option<StringOrVec>,
+    target: Option<String>,
     links: Option<String>,
     exclude: Option<Vec<String>>,
     include: Option<Vec<String>>,
@@ -1297,9 +1299,17 @@ impl TomlManifest {
             }
         }
 
+        let kind = me
+            .package
+            .as_ref()
+            .and_then(|p| p.target.as_ref())
+            .map(|t| CompileTarget::new(t).map(CompileKind::Target))
+            .transpose()?;
+
         let custom_metadata = project.metadata.clone();
         let mut manifest = Manifest::new(
             summary,
+            kind,
             targets,
             exclude,
             include,

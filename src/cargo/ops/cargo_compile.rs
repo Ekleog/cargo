@@ -307,6 +307,10 @@ pub fn create_bcx<'a, 'cfg>(
         ref local_rustdoc_args,
         rustdoc_document_private_items,
     } = *options;
+    eprintln!(
+        "In create_bcx, build_config.requested_kinds = {:?}",
+        build_config.requested_kinds
+    );
     let config = ws.config();
 
     // Perform some pre-flight validation.
@@ -461,6 +465,11 @@ pub fn create_bcx<'a, 'cfg>(
         &profiles,
         interner,
     )?;
+    eprintln!("Root units are {:?}:", units);
+    for u in units.iter() {
+        eprintln!(" - package ‘{}’ with kind ‘{:?}’", u.pkg.name(), u.kind);
+    }
+    eprintln!("Backtrace {}", std::backtrace::Backtrace::force_capture());
 
     let std_roots = if let Some(crates) = &config.cli_unstable().build_std {
         // Only build libtest if it looks like it is needed.
@@ -857,7 +866,7 @@ fn generate_targets(
             let features_for = FeaturesFor::from_for_host(target.proc_macro());
             let features = resolved_features.activated_features(pkg.package_id(), features_for);
 
-            for kind in requested_kinds {
+            for kind in requested_kinds.iter().chain(pkg.manifest().kind().iter()) {
                 let unit = interner.intern(
                     pkg,
                     target,

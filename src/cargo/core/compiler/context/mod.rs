@@ -287,8 +287,15 @@ impl<'a, 'cfg> Context<'a, 'cfg> {
         let dest = self.bcx.profiles.get_dir_name();
         let host_layout = Layout::new(self.bcx.ws, None, &dest)?;
         let mut targets = HashMap::new();
+        // TODO: maybe this whole loop can just go away now that we're getting kinds from units?
         for kind in self.bcx.build_config.requested_kinds.iter() {
             if let CompileKind::Target(target) = *kind {
+                let layout = Layout::new(self.bcx.ws, Some(target), &dest)?;
+                targets.insert(target, layout);
+            }
+        }
+        for unit in self.bcx.unit_graph.keys() {
+            if let CompileKind::Target(target) = unit.kind {
                 let layout = Layout::new(self.bcx.ws, Some(target), &dest)?;
                 targets.insert(target, layout);
             }

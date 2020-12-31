@@ -54,6 +54,11 @@ impl BuildConfig {
         requested_targets: &[String],
         mode: CompileMode,
     ) -> CargoResult<BuildConfig> {
+        eprintln!(
+            "Calling BuildConfig::new with requested_targets = {:?}",
+            requested_targets
+        );
+        eprintln!("Backtrace: {}", std::backtrace::Backtrace::force_capture());
         let cfg = config.build_config()?;
         let requested_kinds = CompileKind::from_requested_targets(config, requested_targets)?;
         if jobs == Some(0) {

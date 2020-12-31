@@ -1,3 +1,4 @@
+#![feature(backtrace)]
 #![cfg_attr(test, deny(warnings))]
 // While we're getting used to 2018:
 #![warn(rust_2018_idioms)]

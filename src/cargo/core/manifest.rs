@@ -10,7 +10,7 @@ use serde::ser;
 use serde::Serialize;
 use url::Url;
 
-use crate::core::compiler::CrateType;
+use crate::core::compiler::{CompileKind, CrateType};
 use crate::core::resolver::ResolveBehavior;
 use crate::core::{Dependency, PackageId, PackageIdSpec, SourceId, Summary};
 use crate::core::{Edition, Feature, Features, WorkspaceConfig};
@@ -31,6 +31,7 @@ pub enum EitherManifest {
 pub struct Manifest {
     summary: Summary,
     targets: Vec<Target>,
+    kind: Option<CompileKind>,
     links: Option<String>,
     warnings: Warnings,
     exclude: Vec<String>,
@@ -365,6 +366,7 @@ compact_debug! {
 impl Manifest {
     pub fn new(
         summary: Summary,
+        kind: Option<CompileKind>,
         targets: Vec<Target>,
         exclude: Vec<String>,
         include: Vec<String>,
@@ -387,6 +389,7 @@ impl Manifest {
     ) -> Manifest {
         Manifest {
             summary,
+            kind,
             targets,
             warnings: Warnings::new(),
             exclude,
@@ -412,6 +415,9 @@ impl Manifest {
 
     pub fn dependencies(&self) -> &[Dependency] {
         self.summary.dependencies()
+    }
+    pub fn kind(&self) -> Option<CompileKind> {
+        self.kind
     }
     pub fn exclude(&self) -> &[String] {
         &self.exclude

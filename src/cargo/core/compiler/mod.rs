@@ -776,6 +776,9 @@ fn build_base_args(
 ) -> CargoResult<()> {
     assert!(!unit.mode.is_run_custom_build());
 
+    eprintln!("Compiling with build_base_args with unit.kind = {:?}", unit.kind);
+    eprintln!("Backtrace: {}", std::backtrace::Backtrace::force_capture());
+
     let bcx = cx.bcx;
     let Profile {
         ref opt_level,

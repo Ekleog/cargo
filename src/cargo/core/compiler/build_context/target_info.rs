@@ -141,6 +141,11 @@ impl TargetInfo {
             .args(&rustflags)
             .env_remove("RUSTC_LOG");
 
+        eprintln!(
+            "Calling TargetInfo::new with requested_kinds = {:?} and kind = {:?}",
+            requested_kinds, kind
+        );
+        eprintln!("Backtrace: {}", std::backtrace::Backtrace::force_capture());
         if let CompileKind::Target(target) = kind {
             process.arg("--target").arg(target.rustc_target());
         }
@@ -672,13 +677,18 @@ impl RustcTargetData {
         let host_info = TargetInfo::new(config, requested_kinds, &rustc, CompileKind::Host)?;
         let mut target_config = HashMap::new();
         let mut target_info = HashMap::new();
-        for kind in requested_kinds {
-            if let CompileKind::Target(target) = *kind {
+        // Note that we cannot just rely on getting kinds for all units as the units aren't built yet (TODO CHECK THIS IS TRUE?)
+        let all_kinds = requested_kinds
+            .iter()
+            .copied()
+            .chain(ws.members().flat_map(|p| p.manifest().kind().into_iter()));
+        for kind in all_kinds {
+            if let CompileKind::Target(target) = kind {
                 let tcfg = config.target_cfg_triple(target.short_name())?;
                 target_config.insert(target, tcfg);
                 target_info.insert(
                     target,
-                    TargetInfo::new(config, requested_kinds, &rustc, *kind)?,
+                    TargetInfo::new(config, requested_kinds, &rustc, kind)?,
                 );
             }
         }
